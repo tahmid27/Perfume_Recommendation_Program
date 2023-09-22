@@ -12,9 +12,9 @@ feature_vectors = vectorizer.fit_transform(features.values.astype('U'))
 # Step 4: Calculate similarity
 similarity_matrix = cosine_similarity(feature_vectors, feature_vectors)
 # Step 5: Recommend perfumes
-def recommend_perfumes(liked_perfumes, top_n=5):
-    # Find the indices of liked perfumes
-    liked_indices = dataset[dataset['Name'].isin(liked_perfumes)].index
+def recommend_perfumes(liked_perfumes, top_n):
+    # Find the indices of perfumes that contain the liked perfume substrings
+    liked_indices = dataset[dataset['Name'].str.contains('|'.join(liked_perfumes), case=False, regex=True)].index
 
     # Calculate the similarity scores for the liked perfumes
     similarity_scores = similarity_matrix[liked_indices]
@@ -30,9 +30,17 @@ def recommend_perfumes(liked_perfumes, top_n=5):
     recommended_perfumes = dataset.loc[top_indices, 'Name'].tolist()
 
     return recommended_perfumes
-# Example usage
-liked_perfumes = ['Rose de Petra Eau de Parfum', 'Wood Jasmin Eau de Parfum']  # Replace with the names of perfumes liked by the client
-recommended = recommend_perfumes(liked_perfumes)
+
+# Prompt the user for their liked perfumes
+liked_perfumes = []
+for i in range(3):
+    perfume = input(f"Enter the name of perfume {i+1}: ")
+    liked_perfumes.append(perfume)
+
+top_n = int(input("How many recommendations would you like?: "))
+
+recommended = recommend_perfumes(liked_perfumes, top_n)
+
 print("Recommended perfumes:")
 for perfume in recommended:
     print(perfume)
